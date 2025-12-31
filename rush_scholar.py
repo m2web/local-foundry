@@ -61,7 +61,7 @@ class RushScholar:
     def ask(self, query):
         # 1. RETRIEVAL
         # We increase k to 4 to get a broader range of sources
-        results = self.vector_db.similarity_search(query, k=4)
+        results = self.vector_db.similarity_search(query, k=10)
         
         if not results:
             print("No matching lyrics found in the index.")
