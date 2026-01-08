@@ -42,48 +42,49 @@ The included `rush_scholar.py` demonstrates RAG capabilities with a music-themed
    uv sync
    ```
 
-3. Start Microsoft Foundry service:
+## Starting the foundry service
 
    ```bash
    foundry service start
    ```
 
-4. Verify the model is available:
+## Verify the model is available
 
    ```bash
    foundry model list
    ```
 
-## Usage
-
-Run the Rush Scholar demo:
+## Check your Foundry service port
 
 ```bash
-uv run rush_scholar.py
+foundry service status
 ```
-
-Example queries:
-- "What themes appear in the Hemispheres album?"
-- "What was the conflict of the brain's hemispheres?"
-- "Describe the symbolism in The Trees"
-
-Type `exit` to quit.
 
 ## Configuration
 
 Update these variables in `rush_scholar.py` to match your setup:
 
 ```python
-FOUNDRY_BASE_URL = "http://127.0.0.1:53356/v1/chat/completions"
+FOUNDRY_BASE_URL = "http://127.0.0.1:56473/v1/chat/completions"
 MODEL_NAME = "Phi-4-mini-instruct-generic-cpu:5"
 DATA_FILE = "rush_lyrics_for_indexing.jsonl"
 ```
 
-Check your Foundry service port with:
+## Run the Rush Scholar demo
 
 ```bash
-foundry service status
+uv run rush_scholar.py
 ```
+
+### Example queries
+
+- "What themes appear in the Hemispheres album?"
+- "What was the conflict of the brain's hemispheres?"
+- "Describe the symbolism in The Trees"
+
+### Exiting
+
+Type `exit` to quit.
 
 ## Project Structure
 
