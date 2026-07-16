@@ -25,8 +25,8 @@ A local Retrieval-Augmented Generation (RAG) demo that runs entirely on a single
 
 ## 🛠 Tech Stack
 
-- **Inference Engine**: [Microsoft Foundry Local](images/local_foundry_header.png)
-- **LLM**: Phi-4-mini (CPU-optimized)
+- **Inference Engine**: [Microsoft Foundry Local](https://learn.microsoft.com/en-us/azure/ai-foundry/foundry-local/overview)
+- **LLM**: Phi-4-mini (CPU-optimized, `Phi-4-mini-instruct-generic-cpu:5`)
 - **Vector Database**: ChromaDB
 - **Embeddings**: BAAI/bge-small-en-v1.5
 - **Environment**: `uv` for lightning-fast Python dependency management
@@ -48,10 +48,14 @@ A local Retrieval-Augmented Generation (RAG) demo that runs entirely on a single
 ### Prerequisites
 
 - **Python 3.11+**
-- [Microsoft Foundry CLI](images/local_foundry_header.png) installed and running.
-- `Phi-4-mini-instruct` model downloaded in Foundry.
+- **[uv](https://docs.astral.sh/uv/)** — fast Python package manager
+- **[Microsoft Foundry Local CLI](https://learn.microsoft.com/en-us/azure/ai-foundry/foundry-local/overview)** — install via:
 
-### Installation & Run
+  ```bash
+  winget install Microsoft.FoundryLocal
+  ```
+
+### Step-by-Step Setup
 
 1. **Clone the repository**:
 
@@ -60,30 +64,67 @@ A local Retrieval-Augmented Generation (RAG) demo that runs entirely on a single
    cd local-foundry
    ```
 
-2. **Sync Dependencies**:
+2. **Sync Python dependencies**:
 
    ```bash
    uv sync
    ```
 
-3. **Start Microsoft Foundry**:
+3. **Start the Foundry Local service**:
 
    ```bash
    foundry service start
    ```
 
-4. **Verify Connectivity**:
+4. **Pin the service port** (recommended — prevents the port from changing on each restart):
 
    ```bash
-   foundry model list
-   foundry service status
+   foundry service set --port 54096
    ```
 
-5. **Run the Rush Scholar**:
+   > The script expects port `54096` by default. If you use a different port, update the `FOUNDRY_BASE_URL` in `rush_scholar.py` to match.
+
+5. **Download the Phi-4-mini model** (CPU-optimized, ~4.8 GB):
+
+   ```bash
+   foundry model download Phi-4-mini-instruct-generic-cpu:5
+   ```
+
+6. **Load the model into the service**:
+
+   ```bash
+   foundry model load Phi-4-mini-instruct-generic-cpu:5
+   ```
+
+7. **Verify everything is ready**:
+
+   ```bash
+   foundry service status   # Should show 🟢 on port 54096
+   foundry service list     # Should show phi-4-mini loaded
+   ```
+
+8. **Run the Rush Scholar**:
 
    ```bash
    uv run rush_scholar.py
    ```
+
+### Updating the CLI
+
+To update Foundry Local to the latest version:
+
+```bash
+foundry --version            # Check current version
+winget upgrade Microsoft.FoundryLocal  # Upgrade
+```
+
+### Managing Models
+
+```bash
+foundry model list           # List all available models
+foundry cache list            # List downloaded models on disk
+foundry cache remove <model>  # Delete a model from disk
+```
 
 ---
 
@@ -127,6 +168,19 @@ This project solves this with a **"protocol-light"** approach: minimal Python `r
 - `rush_index/`: Local ChromaDB vector store (generated on first run).
 - `rush_scholar_demo.md`: Extended examples and documentation.
 - `pyproject.toml`: Project metadata and dependencies managed by `uv`.
+
+---
+
+## 🔧 Troubleshooting
+
+| Problem | Solution |
+|---------|----------|
+| `Read timed out` error | The model may need more time on CPU. The script uses a 300-second timeout. Ensure no other heavy processes are competing for CPU. |
+| `charmap codec can't encode characters` | The script includes a UTF-8 encoding fix. If you still see this, ensure you're running the latest version of `rush_scholar.py`. |
+| `BadRequestError: 400` | This is the "Error 400 Boss Fight" — the script uses protocol-light requests to avoid this. See the section above. |
+| Port mismatch / connection refused | Run `foundry service status` to check the actual port, then update `FOUNDRY_BASE_URL` in `rush_scholar.py` to match. Use `foundry service set --port 54096` to pin it. |
+| No models loaded | Run `foundry model load Phi-4-mini-instruct-generic-cpu:5` to load the model into the service. |
+| Stale vector index | Delete the `rush_index/` folder and restart the script to rebuild the index from scratch. |
 
 ---
 

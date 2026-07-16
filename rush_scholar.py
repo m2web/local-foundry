@@ -2,6 +2,9 @@ import json
 import os
 import sys
 import requests
+
+# Fix Windows console encoding for unicode characters (═, 📜, etc.)
+sys.stdout.reconfigure(encoding='utf-8')
 from langchain_chroma import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_core.documents import Document
@@ -11,7 +14,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 # 1. CONFIGURATION
 # ==========================================
 # Ensure port matches your 'foundry service status'
-FOUNDRY_BASE_URL = "http://127.0.0.1:56473/v1/chat/completions"
+FOUNDRY_BASE_URL = "http://127.0.0.1:54096/v1/chat/completions"
 # Must match the EXACT ID from 'foundry model list'
 MODEL_NAME = "Phi-4-mini-instruct-generic-cpu:5" 
 DATA_FILE = "rush_lyrics_for_indexing.jsonl"
@@ -96,7 +99,7 @@ class RushScholar:
         # 4. EXECUTION
         print(f"\n--- Rush Scholar Analysis ---")
         try:
-            response = requests.post(FOUNDRY_BASE_URL, json=payload, stream=True, timeout=120)
+            response = requests.post(FOUNDRY_BASE_URL, json=payload, stream=True, timeout=300)
             for line in response.iter_lines():
                 if line:
                     decoded = line.decode('utf-8').replace('data: ', '')
